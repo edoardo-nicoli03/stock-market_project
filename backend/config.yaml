@@ -40,6 +40,6 @@ security:
 
 admin:
   email: admin@stockapi.com
-  password: ${ADMIN_PASSWORD}
+  password: admin
   first_name: Admin
   last_name: User
