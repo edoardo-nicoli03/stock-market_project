@@ -1,0 +1,45 @@
+database:
+  url: "postgresql://ppm-db_owner:npg_KTbmgd6WskE4@ep-falling-hat-a2pojr0f-pooler.eu-central-1.aws.neon.tech/ppm-db?sslmode=require"
+  pool_size: 10
+  pool_timeout: 30
+  pool_recycle: -1
+
+jwt:
+  secret_key: ${JWT_SECRET_KEY}
+  algorithm: HS256
+  access_token_expire_minutes: 30
+  refresh_token_expire_days: 7
+
+api:
+  host: 0.0.0.0
+  port: 5500
+  debug: false
+  cors_origins: 
+    - http://localhost:3000
+    - http://localhost:5173
+  
+stock_api:
+  # Simulated real-time data configuration
+  update_interval: 5  # seconds
+  volatility_factor: 0.02  # 2% volatility
+  api_key: ${STOCK_API_KEY}  # For future real API integration
+
+redis:
+  url: ${REDIS_URL}
+  decode_responses: true
+
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+security:
+  rate_limit:
+    default: "100 per hour"
+    auth: "5 per minute"
+  password_hash_rounds: 12
+
+admin:
+  email: admin@stockapi.com
+  password: ${ADMIN_PASSWORD}
+  first_name: Admin
+  last_name: User
