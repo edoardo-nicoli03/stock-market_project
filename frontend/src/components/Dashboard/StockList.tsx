@@ -11,6 +11,7 @@ const StockList: React.FC<StockListProps> = ({ onStockSelect }) => {
   const [quotes, setQuotes] = useState<{ [symbol: string]: StockQuote }>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     loadStocks();
@@ -20,8 +21,11 @@ const StockList: React.FC<StockListProps> = ({ onStockSelect }) => {
     // Load quotes for all stocks
     if (stocks.length > 0) {
       loadQuotes();
-      // Refresh quotes every 10 seconds
-      const interval = setInterval(loadQuotes, 10000);
+      // Refresh quotes every 3 seconds for the stock list
+      const interval = setInterval(() => {
+        loadQuotes();
+        setLastUpdate(new Date());
+      }, 3000);
       return () => clearInterval(interval);
     }
   }, [stocks]);
@@ -82,7 +86,13 @@ const StockList: React.FC<StockListProps> = ({ onStockSelect }) => {
   return (
     <div className="bg-white rounded-lg shadow-md">
       <div className="p-4 border-b">
-        <h2 className="text-xl font-bold mb-4">Stock Market</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Stock Market</h2>
+          <div className="text-sm text-gray-500 flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+            Live • Last update: {lastUpdate.toLocaleTimeString()}
+          </div>
+        </div>
         <input
           type="text"
           placeholder="Search stocks..."
@@ -109,6 +119,9 @@ const StockList: React.FC<StockListProps> = ({ onStockSelect }) => {
                 Change
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Volume
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Action
               </th>
             </tr>
@@ -131,9 +144,19 @@ const StockList: React.FC<StockListProps> = ({ onStockSelect }) => {
                     <div className="text-sm text-gray-900">
                       {quote ? formatPrice(quote.price) : '-'}
                     </div>
+                    {quote && (
+                      <div className="text-xs text-gray-500">
+                        {new Date(quote.timestamp).toLocaleTimeString()}
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     {quote ? formatChange(quote.change, quote.change_percent) : '-'}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {quote ? quote.volume.toLocaleString() : '-'}
+                    </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <button

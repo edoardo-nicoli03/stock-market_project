@@ -20,9 +20,10 @@ api:
   
 stock_api:
   # Simulated real-time data configuration
-  update_interval: 5  # seconds
-  volatility_factor: 0.02  # 2% volatility
+  update_interval: 1.5  # seconds
+  volatility_factor: 0.01  # 2% volatility
   api_key: ${STOCK_API_KEY}  # For future real API integration
+  data_retention_days: 2
 
 redis:
   url: ${REDIS_URL}
@@ -34,12 +35,12 @@ logging:
 
 security:
   rate_limit:
-    default: "100 per hour"
+    default: "10000 per hour"
     auth: "5 per minute"
   password_hash_rounds: 12
 
 admin:
   email: admin@stockapi.com
-  password: admin
+  password: ${ADMIN_PASSWORD}
   first_name: Admin
   last_name: User

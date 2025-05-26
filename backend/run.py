@@ -4,6 +4,9 @@ from app.services.stock_service import stock_service
 
 app = create_app()
 
+# Set the app instance for the stock service
+stock_service.set_app(app)
+
 if __name__ == '__main__':
     # Start real-time stock updates
     stock_service.start_real_time_updates()

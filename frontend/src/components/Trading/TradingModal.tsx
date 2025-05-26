@@ -17,7 +17,7 @@ const TradingModal: React.FC<TradingModalProps> = ({ stock, onClose, onTradeComp
 
   useEffect(() => {
     loadQuote();
-    const interval = setInterval(loadQuote, 5000); // Update every 5 seconds
+    const interval = setInterval(loadQuote, 2000); // Update every 2 seconds
     return () => clearInterval(interval);
   }, [stock.symbol]);
 
@@ -73,7 +73,12 @@ const TradingModal: React.FC<TradingModalProps> = ({ stock, onClose, onTradeComp
 
         {quote && (
           <div className="mb-4 p-3 bg-gray-50 rounded">
-            <div className="text-lg font-semibold">${quote.price.toFixed(2)}</div>
+            <div className="flex justify-between items-center">
+              <div className="text-lg font-semibold">${quote.price.toFixed(2)}</div>
+              <div className="text-xs text-gray-500">
+                Live • {new Date(quote.timestamp).toLocaleTimeString()}
+              </div>
+            </div>
             <div className={`text-sm ${quote.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {quote.change >= 0 ? '+' : ''}${quote.change.toFixed(2)} ({quote.change_percent.toFixed(2)}%)
             </div>
