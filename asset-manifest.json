@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/%22https://edoardo-nicoli03.github.io/stock-market_project%22/static/css/main.f6d911f5.css",
-    "main.js": "/%22https://edoardo-nicoli03.github.io/stock-market_project%22/static/js/main.51880233.js",
-    "index.html": "/%22https://edoardo-nicoli03.github.io/stock-market_project%22/index.html",
-    "main.f6d911f5.css.map": "/%22https://edoardo-nicoli03.github.io/stock-market_project%22/static/css/main.f6d911f5.css.map",
-    "main.51880233.js.map": "/%22https://edoardo-nicoli03.github.io/stock-market_project%22/static/js/main.51880233.js.map"
+    "main.css": "/stock-market_project/static/css/main.f6d911f5.css",
+    "main.js": "/stock-market_project/static/js/main.51880233.js",
+    "index.html": "/stock-market_project/index.html",
+    "main.f6d911f5.css.map": "/stock-market_project/static/css/main.f6d911f5.css.map",
+    "main.51880233.js.map": "/stock-market_project/static/js/main.51880233.js.map"
   },
   "entrypoints": [
     "static/css/main.f6d911f5.css",
