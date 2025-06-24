@@ -9,6 +9,7 @@ interface User {
   email: string;
   first_name: string;
   last_name: string;
+  role : 'basic' | 'pro';
 }
 
 interface Stock {
@@ -189,7 +190,13 @@ class ApiService {
   async getTransactions() {
     return this.request('/portfolio/transactions');
   }
+
+  async getStockHistory(symbol: string) {
+    return this.request(`/stocks/${symbol}/history`);
+  }
+
 }
+
 
 const api = new ApiService();
 
@@ -206,7 +213,8 @@ const AuthForm: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
     email: '',
     password: '',
     first_name: '',
-    last_name: ''
+    last_name: '',
+    role: 'basic'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -261,6 +269,26 @@ const AuthForm: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
               />
             </div>
           )}
+          {!isLogin && (
+              <div className="mb-4">
+                <label className="block mb-1 font-medium text-sm text-gray-700">
+                  Account Type
+                </label>
+                <select
+                    value={formData.role}
+                    onChange={e =>
+                        setFormData({
+                          ...formData,
+                          role: e.target.value as 'basic' | 'pro',
+                        })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                >
+                  <option value="basic">Basic</option>
+                  <option value="pro">Pro</option>
+                </select>
+              </div>
+          )}
 
           <div className="mb-4">
             <input
@@ -308,7 +336,10 @@ const AuthForm: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) => {
 };
 
 // Stock List Component
-const StockList: React.FC<{ onTradeClick: (stock: Stock) => void }> = ({ onTradeClick }) => {
+const StockList: React.FC<{
+    onTradeClick(stock: Stock): void;
+    onHistoryClick(symbol: string): void;
+   }> = ({ onTradeClick, onHistoryClick }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [quotes, setQuotes] = useState<{ [symbol: string]: StockQuote }>({});
   const [search, setSearch] = useState('');
@@ -411,6 +442,11 @@ const StockList: React.FC<{ onTradeClick: (stock: Stock) => void }> = ({ onTrade
                       className="text-blue-600 hover:text-blue-900 font-medium"
                     >
                       Trade
+                    </button>
+                    <button onClick={() => onHistoryClick(stock.symbol)}
+                            className="ml-4 text-green-600 hover:text-green-900 font-medium"
+                    >
+                        History
                     </button>
                   </td>
                 </tr>
@@ -727,6 +763,57 @@ const TradingModal: React.FC<{
     </div>
   );
 };
+// ====== NEW COMPONENT: StockHistory ======
+const StockHistory: React.FC<{
+  symbol: string;
+  onClose: () => void;
+}> = ({ symbol, onClose }) => {
+  const [history, setHistory] = useState<{ date: string; price: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getStockHistory(symbol)
+        .then(res => setHistory(res.data.history))
+        .catch(console.error)
+        .finally(() => setLoading(false));
+  }, [symbol]);
+
+  return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold">History: {symbol}</h3>
+            <button onClick={onClose} className="text-2xl">×</button>
+          </div>
+          {loading
+              ? <p>Loading history…</p>
+              : (
+                  <div className="overflow-y-auto max-h-80">
+                    <table className="w-full table-auto">
+                      <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-left">Date</th>
+                        <th className="px-4 py-2 text-left">Price</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {history.map(h => (
+                          <tr key={h.date}>
+                            <td className="px-4 py-2">{h.date}</td>
+                            <td className="px-4 py-2">${h.price.toFixed(2)}</td>
+                          </tr>
+                      ))}
+                      </tbody>
+                    </table>
+                  </div>
+              )
+          }
+        </div>
+      </div>
+  );
+};
+
+
 
 // =============================================================================
 // MAIN APP
@@ -737,6 +824,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'stocks' | 'portfolio'>('stocks');
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+    const [historySymbol, setHistorySymbol] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -796,7 +884,19 @@ const App: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Stock Trading Platform</h1>
-              <p className="text-gray-600">Welcome, {user.first_name} {user.last_name}</p>
+              <p className="text-gray-600 flex items-center space-x-2"><span>
+
+              Welcome, {user.first_name} {user.last_name} </span>
+                <span
+                  className={`px-2 py-1 text-xs font-semibold rounded ${
+                       user.role === 'pro'
+                       ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                         }`}
+                 >
+                   {user.role.toUpperCase()}
+                 </span>
+              </p>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -832,7 +932,7 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {activeTab === 'stocks' && <StockList onTradeClick={setSelectedStock} />}
+        {activeTab === 'stocks' && <StockList onTradeClick={setSelectedStock} onHistoryClick={setHistorySymbol} />}
         {activeTab === 'portfolio' && <PortfolioView />}
       </main>
 
@@ -843,6 +943,12 @@ const App: React.FC = () => {
           onClose={() => setSelectedStock(null)}
           onComplete={handleTradeComplete}
         />
+      )}
+      {historySymbol && (
+          <StockHistory
+              symbol={historySymbol}
+              onClose={() => setHistorySymbol(null)}
+          />
       )}
     </div>
   );
