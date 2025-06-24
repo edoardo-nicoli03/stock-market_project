@@ -1,0 +1,2 @@
+@tailwind base;@tailwind components;@tailwind utilities;@keyframes spin{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.animate-spin{animation:spin 1s linear infinite}
+/*# sourceMappingURL=main.f6d911f5.css.map*/
