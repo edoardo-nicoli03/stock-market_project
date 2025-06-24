@@ -68,7 +68,7 @@ interface Transaction {
 // =============================================================================
 
 class ApiService {
-  private baseURL = 'http://localhost:5500/api';
+  private baseURL = process.env.REACT_APP_API_URL!;
 
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
     const token = localStorage.getItem('access_token');
