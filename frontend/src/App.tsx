@@ -71,7 +71,7 @@ class ApiService {
   private baseURL = process.env.REACT_APP_API_URL!;
 
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
-    const token = localStorage.getItem('access_token');
+    const token = sessionStorage.getItem('access_token');
     const headers = {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -107,7 +107,7 @@ class ApiService {
 
   private async refreshToken(): Promise<boolean> {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
+      const refreshToken = sessionStorage.getItem('refresh_token');
       if (!refreshToken) return false;
 
       const response = await fetch(`${this.baseURL}/auth/refresh`, {
@@ -118,8 +118,8 @@ class ApiService {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('access_token', data.data.tokens.access_token);
-        localStorage.setItem('refresh_token', data.data.tokens.refresh_token);
+        sessionStorage.setItem('access_token', data.data.tokens.access_token);
+        sessionStorage.setItem('refresh_token', data.data.tokens.refresh_token);
         return true;
       }
     } catch (error) {
@@ -127,8 +127,8 @@ class ApiService {
     }
 
     // Clear tokens if refresh failed
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
     return false;
   }
 
@@ -138,8 +138,8 @@ class ApiService {
       body: JSON.stringify({ email, password }),
     });
     
-    localStorage.setItem('access_token', data.data.tokens.access_token);
-    localStorage.setItem('refresh_token', data.data.tokens.refresh_token);
+    sessionStorage.setItem('access_token', data.data.tokens.access_token);
+    sessionStorage.setItem('refresh_token', data.data.tokens.refresh_token);
     
     return data;
   }
@@ -150,8 +150,8 @@ class ApiService {
       body: JSON.stringify(userData),
     });
     
-    localStorage.setItem('access_token', data.data.tokens.access_token);
-    localStorage.setItem('refresh_token', data.data.tokens.refresh_token);
+    sessionStorage.setItem('access_token', data.data.tokens.access_token);
+    sessionStorage.setItem('refresh_token', data.data.tokens.refresh_token);
     
     return data;
   }
@@ -826,21 +826,25 @@ const App: React.FC = () => {
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
     const [historySymbol, setHistorySymbol] = useState<string | null>(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+
+    useEffect(() => {
+ // Cancello eventuali token rimasti per far sempre partire dalla login
+     sessionStorage.removeItem('access_token');
+     sessionStorage.removeItem('refresh_token');
+  setLoading(false);
+}, []);
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+       const token = sessionStorage.getItem('access_token');
       if (token) {
         const response = await api.getProfile();
         setUser(response.data.user);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      sessionStorage.removeItem('access_token');
+      sessionStorage.removeItem('refresh_token');
     } finally {
       setLoading(false);
     }
@@ -851,8 +855,8 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+     sessionStorage.removeItem('access_token');
+     sessionStorage.removeItem('refresh_token');
     setUser(null);
   };
 
